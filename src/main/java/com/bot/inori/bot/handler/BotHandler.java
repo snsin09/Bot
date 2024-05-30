@@ -33,6 +33,9 @@ public class BotHandler {
     @Setter
     private static MetadataChain chain;
 
+    public static Integer SPEAKER_ID = 0;
+
+
     public static void putMembers(List<GroupMemberData> data) {
         if (!data.isEmpty()) {
             BotHandler.MEMBERS.put(data.get(0).getGroup_id(), data);

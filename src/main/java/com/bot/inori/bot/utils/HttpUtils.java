@@ -159,7 +159,7 @@ public class HttpUtils {
     public static JSONObject sendGptGet(List<ChatModel> list) {
         JSONObject object = null;
         try (CloseableHttpClient httpClient = HttpUtils.getClientWithSSL()) {
-            HttpPost httpPost = new HttpPost("https://free.oneai.buzz/v1/chat/completions");
+            HttpPost httpPost = new HttpPost(BaseConfig.ChatCompletions);
             JSONObject obj = new JSONObject();
             obj.put("model", "gpt-3.5-turbo");
             obj.put("temperature", 0.5);
@@ -172,9 +172,10 @@ public class HttpUtils {
             httpPost.setHeader("connection", "keep-alive");
             httpPost.setHeader("accept", "*/*");
             httpPost.setHeader("Content-Type", "application/json; charset=UTF-8");
-            httpPost.setHeader("Authorization", "Bearer a u ok ?");
-            RequestConfig config = RequestConfig.custom().setConnectTimeout(20_000).build();
-            httpPost.setConfig(config);
+            httpPost.setHeader("Authorization", "Bearer " + BaseConfig.ApiKey);
+            RequestConfig.Builder builder = RequestConfig.custom().setConnectTimeout(20_000);
+            if (BaseConfig.ChatCompletions.contains("api.openai.com")) builder.setProxy(getPostProxy());
+            httpPost.setConfig(builder.build());
             HttpResponse response = httpClient.execute(httpPost);
             HttpEntity responseEntity = response.getEntity();
             if (responseEntity != null)

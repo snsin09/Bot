@@ -9,8 +9,6 @@ public class GptData {
 
     private static Map<Long, List<ChatModel>> MESSAGES = new HashMap<>();
 
-    public static String PROMPT = "你的预设";
-
     public static List<ChatModel> getModels(Long qq) {
         List<ChatModel> models = MESSAGES.get(qq);
         return models == null ? new LinkedList<>() : models;

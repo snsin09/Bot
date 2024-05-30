@@ -45,6 +45,14 @@ public class BaseConfig implements WebServerFactoryCustomizer<ConfigurableWebSer
 
     public static Boolean friendInfo = Boolean.TRUE;
 
+    public static String CharacterPrompt;
+
+    public static String ChatCompletions = "https://api.openai.com/v1/completions";
+
+    public static String ApiKey = "a u ok ?";
+
+    public static String VitsUrl;
+
     static {
         try {
             MessageHandler.getLogger().info("初始化配置");

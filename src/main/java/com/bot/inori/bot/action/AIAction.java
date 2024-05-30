@@ -4,8 +4,10 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.bot.inori.bot.action.func.ai.*;
+import com.bot.inori.bot.config.BaseConfig;
 import com.bot.inori.bot.handler.BotHandler;
 import com.bot.inori.bot.handler.MessageHandler;
+import com.bot.inori.bot.handler.PermissionHandler;
 import com.bot.inori.bot.model.req.MediaMessage;
 import com.bot.inori.bot.model.req.TextMessage;
 import com.bot.inori.bot.model.res.MetadataChain;
@@ -64,7 +66,7 @@ public class AIAction {
             String cmd = chain.getBasicCommand().trim();
             if (cmd.startsWith("回复")) cmd = cmd.substring(2).trim();
             List<ChatModel> list = new ArrayList<>();
-            list.add(new ChatModel("system", GptData.PROMPT));
+            list.add(new ChatModel("system", BaseConfig.CharacterPrompt));
             list.addAll(GptData.getModels(chain.getSender().getUser_id()));
             list.add(new ChatModel("user", cmd));
             JSONObject result = HttpUtils.sendGptGet(list);
@@ -76,6 +78,10 @@ public class AIAction {
                         chain.sendReplyMsg(new TextMessage(msg));
                         GptData.putSendModels(chain.getSender().getUser_id(), cmd);
                         GptData.putReplyModels(chain.getSender().getUser_id(), msg);
+                        if (BotHandler.isMaster(chain.getSender().getUser_id()) || PermissionHandler.checkPermission("语音回复", chain.getGroup_id())) {
+                            String url = String.format(BaseConfig.VitsUrl + "voice/vits?id=%s&text=%s", BotHandler.SPEAKER_ID, msg);
+                            if (HttpUtils.isUrlOk(url)) chain.sendMsg(MediaMessage.audioMedia(url));
+                        }
                     }
                 } else {
                     GptData.clearModels(chain.getSender().getUser_id());
@@ -90,6 +96,54 @@ public class AIAction {
         } catch (Exception e) {
             MessageHandler.getLogger().error("AI回复报错 {}", e.getMessage());
         }
+    }
+
+    @BotCommand(cmd = "语音回复", description = "使用AI语音回复")
+    public void voiceReply(MetadataChain chain) {
+        String msg = chain.getBasicCommand().substring(4).trim();
+        if (StringUtil.isBlank(msg)) return;
+        String url = String.format(BaseConfig.VitsUrl + "voice/vits?id=%s&text=%s", BotHandler.SPEAKER_ID, msg);
+        if (HttpUtils.isUrlOk(url)) chain.sendMsg(MediaMessage.audioMedia(url));
+    }
+
+    @BotCommand(cmd = "发言人", description = "查看回复语言发言人", isMaster = true)
+    public void speaker(MetadataChain chain) {
+        String url = BaseConfig.VitsUrl + "voice/speakers";
+        if (HttpUtils.isUrlOk(url)) {
+            JSONObject json = HttpUtils.sendGet(url, false);
+            if (json != null) {
+                JSONArray arr = json.getJSONArray("VITS");
+                StringBuilder sb = new StringBuilder();
+                sb.append("id  发言人");
+                for (int i = 0; i < arr.size(); i++) {
+                    JSONObject obj = arr.getJSONObject(i);
+                    sb.append("\n");
+                    if (i < 10) sb.append(" ");
+                    sb.append(obj.get("id")).append("  ").append(obj.get("name"));
+                }
+                chain.sendMsg(new TextMessage(sb.toString()));
+            }
+        }
+    }
+
+    @BotCommand(cmd = "设置发言人", description = "查看回复语言发言人", isMaster = true)
+    public void setSpeaker(MetadataChain chain) {
+        String cmd = chain.getBasicCommand().substring(5).trim();
+        if (StringUtil.isBlank(cmd) || !StringUtil.isNumeric(cmd)) return;
+        String url = BaseConfig.VitsUrl + "voice/speakers";
+        if (HttpUtils.isUrlOk(url)) {
+            JSONObject json = HttpUtils.sendGet(url, false);
+            if (json != null) {
+                JSONArray arr = json.getJSONArray("VITS");
+                int index = Integer.parseInt(cmd);
+                if (arr.size() > index) {
+                    BotHandler.SPEAKER_ID = index;
+                    chain.sendReplyMsg(new TextMessage(String.format("设置发言人%s成功", arr.getJSONObject(index).getString("name"))));
+                    return;
+                }
+            }
+        }
+        chain.sendReplyMsg(new TextMessage("设置发言人失败"));
     }
 
     @BotCommand(cmd = "gpt", alias = "GPT,Gpt", description = "使用gpt对话功能", permit = false)
