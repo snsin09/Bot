@@ -24,12 +24,10 @@ import com.google.zxing.common.HybridBinarizer;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -207,16 +205,6 @@ public class BaseAction {
             }
         }
         chain.sendMsg(resp);
-    }
-
-    @BotCommand(cmd = "智乃", description = "一些智乃表情包", permit = false)
-    public void chino(MetadataChain chain) {
-        File file = BotHandler.getDir("chino");
-        if (file.isDirectory()) {
-            Random random = new Random();
-            File[] files = file.listFiles();
-            if (files != null) chain.sendMsg(MediaMessage.imageMedia(files[random.nextInt(files.length)]));
-        }
     }
 
     @BotCommand(cmd = "制作卡片", alias = "图转卡", description = "制作卡片，图片必须，其他参数：外显 标题 子标题")

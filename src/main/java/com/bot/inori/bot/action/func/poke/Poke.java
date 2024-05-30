@@ -55,16 +55,6 @@ public class Poke {
                     chain.sendMsg(new TextMessage(HttpUtils.getResp("https://api.yujn.cn/api/wenan.php?")));
             case 20,21 -> //随机柴郡
                     chain.sendMsg(MediaMessage.imageMedia("http://api.yujn.cn/api/chaijun.php?"));
-            case 22,23,24 -> {
-                File file = BotHandler.getDir("chino");
-                File[] files = file.listFiles();
-                if (files != null) chain.sendMsg(MediaMessage.imageMedia(files[random.nextInt(files.length)]));
-            }
-            case 25,26,27 -> {
-                File file = BotHandler.getDir("真白");
-                File[] files = file.listFiles();
-                if (files != null) chain.sendMsg(MediaMessage.imageMedia(files[random.nextInt(files.length)]));
-            }
             default -> {
                 //二次元的你
                 if (chain.getGroup_id() != null) {
