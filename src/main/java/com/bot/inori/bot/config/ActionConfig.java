@@ -3,7 +3,6 @@ package com.bot.inori.bot.config;
 import com.bot.inori.bot.utils.annotation.BotCommand;
 import com.bot.inori.bot.handler.BotHandler;
 import com.bot.inori.bot.model.data.ActionData;
-import com.bot.inori.bot.action.func.pet.PetCenter;
 import com.bot.inori.bot.handler.MessageHandler;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
@@ -80,9 +79,6 @@ public class ActionConfig {
         action.setRegexAlias(anno.regexAlias());
         action.setAlias(anno.alias());
         action.setPermit(anno.permit());
-        if (anno.cmd().equalsIgnoreCase("pet")) {
-            action.setAlias(PetCenter.getKeyAliasListString().replaceAll("\n", ","));
-        }
         action.setDescription(anno.description());
         action.setClazz(clazz);
         action.setMethod(method);

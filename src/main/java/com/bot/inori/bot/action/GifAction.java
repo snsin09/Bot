@@ -12,12 +12,13 @@ import com.bot.inori.bot.model.res.AtMsg;
 import com.bot.inori.bot.model.res.FileMsg;
 import com.bot.inori.bot.model.res.MetadataChain;
 import com.bot.inori.bot.utils.*;
-import moe.dituon.petpet.share.ImageSynthesis;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -60,7 +61,7 @@ public class GifAction {
             if (img != null) url = img.getUrl();
             else if (reply != null) url = ImageCacheData.gutData(reply.getId());
             if (url != null) {
-                BufferedImage bi = ImageSynthesis.getWebImage(url);
+                BufferedImage bi = ImageIO.read(new URL(url));
                 if (bi != null && bi.getType() == BufferedImage.TYPE_BYTE_INDEXED) {
                     String path = Objects.requireNonNull(BotHandler.getFile("working/temp.gif")).getAbsolutePath();
                     ImageIO.write(bi, "gif", new File(path));
@@ -94,7 +95,7 @@ public class GifAction {
             if (img != null) url = img.getUrl();
             else if (reply != null) url = ImageCacheData.gutData(reply.getId());
             if (url != null) {
-                BufferedImage bi = ImageSynthesis.getWebImage(url);
+                BufferedImage bi = ImageIO.read(new URL(url));
                 if (bi != null && bi.getType() == BufferedImage.TYPE_BYTE_INDEXED) {
                     String path = Objects.requireNonNull(BotHandler.getFile("working/temp.gif")).getAbsolutePath();
                     ImageIO.write(bi, "gif", new File(path));
@@ -142,7 +143,7 @@ public class GifAction {
             String url;
             if (img != null) url = img.getUrl();
             else url = BotHandler.getQQHeadUrl(at.getQq());
-            BufferedImage bi = ImageSynthesis.getWebImage(url);
+            BufferedImage bi = ImageIO.read(new URL(url));
             if (bi != null) {
                 GifUtils.imagesRotate(bi, path, seconds);
                 chain.sendMsg(MediaMessage.imageMedia(FileUtils.dlOrMoveImage2LS(path, false)));
@@ -157,14 +158,16 @@ public class GifAction {
             List<BufferedImage> images = new ArrayList<>();
             if (StringUtil.isBlank(content)) {
                 List<FileMsg> list = chain.getImages();
-                if (!list.isEmpty()) list.forEach(msg -> images.add(ImageSynthesis.getWebImage(msg.getUrl())));
+                if (!list.isEmpty()) {
+                    for (FileMsg msg : list) images.add(ImageIO.read(new URL(msg.getUrl())));
+                }
             } else {
                 if (StringUtil.isNumeric(content)) {
                     List<String> list = PixivUtils.getPixivMsg(Long.parseLong(content), 1);
                     if (list.size() > 1) {
                         for (String str : list) {
                             if (str.contains("?")) str = str.substring(0, str.indexOf("?"));
-                            images.add(ImageSynthesis.getWebImage(str));
+                            images.add(ImageIO.read(new URL(str)));
                         }
                     } else chain.sendMsg("图源必须包含1张以上图片");
                 }
