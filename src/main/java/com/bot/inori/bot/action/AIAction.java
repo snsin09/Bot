@@ -19,6 +19,8 @@ import com.bot.inori.bot.utils.annotation.BotCommand;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -79,7 +81,7 @@ public class AIAction {
                         GptData.putSendModels(chain.getSender().getUser_id(), cmd);
                         GptData.putReplyModels(chain.getSender().getUser_id(), msg);
                         if (BotHandler.isMaster(chain.getSender().getUser_id()) || PermissionHandler.checkPermission("语音回复", chain.getGroup_id())) {
-                            String url = String.format(BaseConfig.VitsUrl + "voice/vits?id=%s&text=%s", BotHandler.SPEAKER_ID, msg);
+                            String url = String.format(BaseConfig.VitsUrl + "voice/vits?id=%s&text=%s", BotHandler.SPEAKER_ID, URLEncoder.encode(msg, StandardCharsets.UTF_8));
                             if (HttpUtils.isUrlOk(url)) chain.sendMsg(MediaMessage.audioMedia(url));
                         }
                     }
@@ -102,7 +104,7 @@ public class AIAction {
     public void voiceReply(MetadataChain chain) {
         String msg = chain.getBasicCommand().substring(4).trim();
         if (StringUtil.isBlank(msg)) return;
-        String url = String.format(BaseConfig.VitsUrl + "voice/vits?id=%s&text=%s", BotHandler.SPEAKER_ID, msg);
+        String url = String.format(BaseConfig.VitsUrl + "voice/vits?id=%s&text=%s", BotHandler.SPEAKER_ID, URLEncoder.encode(msg, StandardCharsets.UTF_8));
         if (HttpUtils.isUrlOk(url)) chain.sendMsg(MediaMessage.audioMedia(url));
     }
 
