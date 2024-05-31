@@ -12,6 +12,8 @@ import com.bot.inori.bot.utils.SimpleMessageUtils;
 import com.bot.inori.bot.utils.annotation.BotCommand;
 
 import java.io.File;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -83,7 +85,7 @@ public class FunAction {
             AtMsg at = chain.getFirstAt();
             if (at != null) user_id = at.getQq();
             chain.sendMsg(new TextMessage(HttpUtils.getResp(String.format("https://api.lolimi.cn/API/Ser/?name=%s&type=text",
-                    BotHandler.getMemberInfo(chain.getGroup_id(), user_id).getNickname()))));
+                    URLEncoder.encode(BotHandler.getMemberInfo(chain.getGroup_id(), chain.getSender().getUser_id()).getNickname(), StandardCharsets.UTF_8)))));
         }
     }
 

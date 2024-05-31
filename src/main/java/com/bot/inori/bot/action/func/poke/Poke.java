@@ -11,6 +11,8 @@ import com.bot.inori.bot.model.res.TextMsg;
 import com.bot.inori.bot.utils.HttpUtils;
 
 import java.io.File;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -59,7 +61,7 @@ public class Poke {
                 //二次元的你
                 if (chain.getGroup_id() != null) {
                     chain.sendMsg(new TextMessage(HttpUtils.getResp(String.format("https://api.lolimi.cn/API/Ser/?name=%s&type=text",
-                            BotHandler.getMemberInfo(chain.getGroup_id(), chain.getSender().getUser_id()).getNickname()))));
+                            URLEncoder.encode(BotHandler.getMemberInfo(chain.getGroup_id(), chain.getSender().getUser_id()).getNickname(), StandardCharsets.UTF_8)))));
                 }
             }
         }
