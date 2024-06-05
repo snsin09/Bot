@@ -6,7 +6,6 @@ import com.bot.inori.bot.config.ActionConfig;
 import com.bot.inori.bot.handler.BotHandler;
 import com.bot.inori.bot.handler.PermissionHandler;
 import com.bot.inori.bot.model.data.ActionData;
-import com.bot.inori.bot.model.req.MarkDownMessage;
 import com.bot.inori.bot.model.req.MediaMessage;
 import com.bot.inori.bot.model.req.PokeTouchMessage;
 import com.bot.inori.bot.model.req.TextMessage;
@@ -237,11 +236,6 @@ public class BaseAction {
             chain.sendMsg("[CQ:json,data=" + data.replaceAll(",", "&#44;") + "]");
 //            chain.sendMsg("[CQ:json,data={\"app\":\"com.tencent.gxhServiceIntelligentTip\"&#44;\"desc\":\"鹿子零java\"&#44;\"view\":\"gxhServiceIntelligentTip\"&#44;\"bizsrc\":\"\"&#44;\"ver\":\"\"&#44;\"prompt\":\"冒泡\"&#44;\"appID\":\"\"&#44;\"sourceName\":\"\"&#44;\"actionData\":\"\"&#44;\"actionData_A\":\"\"&#44;\"sourceUrl\":\"\"&#44;\"meta\":{\"gxhServiceIntelligentTip\":{\"action\":\"\"&#44;\"appid\":\"gxhServiceIntelligentTip\"&#44;\"bgImg\":\"https://p.qlogo.cn/homework/0/hw_h_5d37122rx4cogkc65dc8947af82f/0\"&#44;\"reportParams\":{}}}&#44;\"config\":{\"autoSize\":0&#44;\"ctime\":1691351380&#44;\"forward\":1&#44;\"height\":520&#44;\"token\":\"4f8ae05ebca255eea79acad7f5a1edb5\"&#44;\"type\":\"normal\"&#44;\"width\":9999}&#44;\"text\":\"\"&#44;\"extraApps\":&#91;&#93;&#44;\"sourceAd\":\"\"&#44;\"extra\":\"\"}]");
         }
-    }
-
-    @BotCommand(cmd = "领取猫娘", description = "领取猫娘")
-    public void catGirl(MetadataChain chain) {
-        chain.sendMsg(new MarkDownMessage());
     }
 
     @BotCommand(cmd = "文转卡", description = "文字转图片功能，内容参数必须，内容 标题 外显")

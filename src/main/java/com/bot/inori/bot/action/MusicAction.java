@@ -72,12 +72,6 @@ public class MusicAction {
                 chain, null, 1);
     }
 
-    public static void main(String[] args) {
-        JSONObject res = HttpUtils.sendGet("https://api.mrgnb.cn/API/netease.php?msg=起风了&count=20&page=1", false);
-        JSONArray array = res.getJSONArray("data");
-        WrapHtmlUtils.generateMusic(array);
-    }
-
     private void dealMusic(String url, MetadataChain chain, Integer index, Integer page) {
         try {
             if (index != null) url += "&n=" + index;

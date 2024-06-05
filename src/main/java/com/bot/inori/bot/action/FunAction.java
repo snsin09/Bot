@@ -78,7 +78,7 @@ public class FunAction {
         chain.sendMsg(new TextMessage(HttpUtils.getResp("https://api.yujn.cn/api/dmyiyan.php?")));
     }
 
-    @BotCommand(cmd = "少女", alias = "少女", description = "今天你、我、TA是什么少女", regexAlias = true, permit = false)
+    @BotCommand(cmd = "少女", alias = "少女", description = "今天你、我、TA是什么少女", permit = false)
     public void ecy(MetadataChain chain) {
         if (chain.getGroup_id() != null) {
             Long user_id = chain.getSender().getUser_id();

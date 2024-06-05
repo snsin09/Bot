@@ -12,7 +12,9 @@ import org.springframework.context.annotation.Configuration;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Properties;
 
@@ -60,7 +62,7 @@ public class BaseConfig implements WebServerFactoryCustomizer<ConfigurableWebSer
             File file = BotHandler.getFile("config.properties");
             assert file != null;
             FileInputStream fis = new FileInputStream(file);
-            properties.load(fis);
+            properties.load(new InputStreamReader(fis, StandardCharsets.UTF_8));
             if (properties.isEmpty()) {
                 fis.close();
                 InputStream is = BaseConfig.class.getClassLoader().getResourceAsStream("config.properties");

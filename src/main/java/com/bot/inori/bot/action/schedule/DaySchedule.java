@@ -36,16 +36,18 @@ public class DaySchedule {
         }
     }
 
-    //清除图片缓存
-    @Scheduled(cron = "0 0 * * * ?")
+    //更新图片外显 定时回收垃圾
+    @Scheduled(cron = "0 0/10 * * * ?")
     public void updateSummary() {
         try {
             String msg = HttpUtils.getResp("https://api.oick.cn/api/yiyan");
-            if (msg != null) {
-                MoeHuData.SUMMARY = msg.substring(1, msg.length() - 1);
-            }
+            if (msg != null) MoeHuData.SUMMARY = msg.substring(1, msg.length() - 1);
+            System.gc();
+            Process process = Runtime.getRuntime().exec("taskkill /F /IM chrome.exe");
+            int exitCode = process.waitFor();
+            System.out.println("清理谷歌进程返回值: " + exitCode);
         } catch (Exception e) {
-            MessageHandler.getLogger().error("更新图片总结报错 {}", e.getMessage());
+            MessageHandler.getLogger().error("更新图片外显报错 {}", e.getMessage());
         }
     }
 
