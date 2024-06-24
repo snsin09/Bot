@@ -1,7 +1,7 @@
 package com.bot.inori.bot.utils;
 
 import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONObject;
+import com.bot.inori.bot.action.*;
 import com.bot.inori.bot.handler.BotHandler;
 import com.bot.inori.bot.model.data.ActionData;
 import freemarker.template.Configuration;
@@ -14,23 +14,22 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.tidy.Tidy;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.params.SetParams;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 public class WrapHtmlUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(WrapHtmlUtils.class);
 
     public static String captureHtml(String url) {
+        ChromeDriver driver = null;
         try {
-            ChromeDriver driver = ScreenShotUtils.chromeDriver(true);
+            driver = ScreenShotUtils.chromeDriver(true);
             driver.get(url);
             long height = (long) driver.executeScript("return document.documentElement.scrollHeight");
             driver.manage().window().setSize(new Dimension(1440, (int) height));
@@ -41,16 +40,22 @@ public class WrapHtmlUtils {
             File file = BotHandler.getFile("working/screenshot.png");
             assert file != null;
             FileUtils.copyFile(screenshotFile, file);
-            driver.close();
-            driver.quit();
             return com.bot.inori.bot.utils.FileUtils.dlOrMoveImage2LS(file.getAbsolutePath(), false);
         } catch (Exception e) {
             logger.error("网页截图报错 {}", e.getMessage());
+            return null;
+        } finally {
+            if (driver != null) {
+                try {
+                    driver.close();
+                    driver.quit();
+                } catch (Exception ignored) {}
+            }
         }
-        return null;
     }
 
     public static String generateMusic(JSONArray array) {
+        ChromeDriver driver = null;
         try {
             Configuration configuration = new Configuration(Configuration.getVersion());
             configuration.setDirectoryForTemplateLoading(BotHandler.getDir("static"));
@@ -72,7 +77,7 @@ public class WrapHtmlUtils {
             template.process(map, fileWriter);
             fileWriter.close();
             htmlCovertToHtml(f1, f2);
-            ChromeDriver driver = ScreenShotUtils.chromeDriver(true);
+            driver = ScreenShotUtils.chromeDriver(true);
             driver.get(f2.getAbsolutePath());
             driver.manage().window().setSize(new Dimension(width + 20, height + 20));
             // 隐藏滚动条
@@ -81,28 +86,87 @@ public class WrapHtmlUtils {
             Thread.sleep(200);
             File screenshot = driver.getScreenshotAs(OutputType.FILE);
             FileUtils.copyFile(screenshot, Objects.requireNonNull(BotHandler.getFile("working/music.png")));
-            driver.close();
-            driver.quit();
             return com.bot.inori.bot.utils.FileUtils.dlOrMoveImage2LS(Objects.requireNonNull(
                     BotHandler.getFile("working/music.png")).getAbsolutePath(), false);
         } catch (Exception e) {
             logger.error("生成点歌列表报错 {}", e.getMessage());
+            return null;
+        } finally {
+            if (driver != null) {
+                try {
+                    driver.close();
+                    driver.quit();
+                } catch (Exception ignored) {}
+            }
         }
-        return null;
     }
 
     public static String generateMenu(List<ActionData> actions) {
+        ChromeDriver driver = null;
         try {
             Configuration configuration = new Configuration(Configuration.getVersion());
             configuration.setDirectoryForTemplateLoading(BotHandler.getDir("static"));
             configuration.setDefaultEncoding("utf-8");
             Template template = configuration.getTemplate("menu.ftl");
-            int width = 1000, height = 40 + (actions.size() + 1) * 32 + 40;
+            int width = 1000, height = 80;
 
             HashMap<String, Object> map = new HashMap<>();
+            List<Map<String, Object>> list = new ArrayList<>();
+            //BaseAction和GroupManageAction设置为基础功能
+            Map<String, Object> sector = new HashMap<>();
+            sector.put("name", "基础功能");
+            List<ActionData> data = actions.stream().filter(action -> action.getClazz().equals(BaseAction.class) ||
+                    action.getClazz().equals(GroupManageAction.class)).toList();
+            if (!data.isEmpty()) {
+                sector.put("list", data);
+                list.add(sector);
+                height += 40 + 51 * ((int) Math.ceil((double) data.size() / 4));
+            }
+            //AI和naifu设置为AI功能
+            sector = new HashMap<>();
+            sector.put("name", "AI功能");
+            data = actions.stream().filter(action -> action.getClazz().equals(AIAction.class) ||
+                    action.getClazz().equals(NaifuAction.class)).toList();
+            if (!data.isEmpty()) {
+                sector.put("list", data);
+                list.add(sector);
+                height += 40 + 51 * ((int) Math.ceil((double) data.size() / 4));
+            }
+            //Bili Blhx Fun Gif MoeHu Music Pet Pixiv设置为娱乐功能
+            sector = new HashMap<>();
+            sector.put("name", "娱乐功能");
+            data = actions.stream().filter(action -> action.getClazz().equals(BiliAction.class) ||
+                    action.getClazz().equals(FunAction.class) ||
+                    action.getClazz().equals(GifAction.class) ||
+                    action.getClazz().equals(MeoHuAction.class) ||
+                    action.getClazz().equals(MusicAction.class) ||
+                    action.getClazz().equals(PixivAction.class)).toList();
+            if (!data.isEmpty()) {
+                sector.put("list", data);
+                list.add(sector);
+                height += 40 + 51 * ((int) Math.ceil((double) data.size() / 4));
+            }
+            //Search Twitter设置为杂项
+            sector = new HashMap<>();
+            sector.put("name", "其他功能");
+            data = actions.stream().filter(action -> !action.getClazz().equals(BaseAction.class) &&
+                    !action.getClazz().equals(GroupManageAction.class) &&
+                    !action.getClazz().equals(AIAction.class) &&
+                    !action.getClazz().equals(NaifuAction.class) &&
+                    !action.getClazz().equals(BiliAction.class) &&
+                    !action.getClazz().equals(FunAction.class) &&
+                    !action.getClazz().equals(GifAction.class) &&
+                    !action.getClazz().equals(MeoHuAction.class) &&
+                    !action.getClazz().equals(MusicAction.class) &&
+                    !action.getClazz().equals(PixivAction.class)).toList();
+            if (!data.isEmpty()) {
+                sector.put("list", data);
+                list.add(sector);
+                height += 40 + 51 * ((int) Math.ceil((double) data.size() / 4));
+            }
             File[] files = BotHandler.getDir("background").listFiles();
             if (files != null) map.put("bg", files[new Random().nextInt(files.length)].getAbsolutePath().replace("\\", "/"));
-            map.put("list", actions);
+            map.put("list", list);
             map.put("width", width);
             map.put("height", height);
 
@@ -113,7 +177,7 @@ public class WrapHtmlUtils {
             template.process(map, fileWriter);
             fileWriter.close();
             htmlCovertToHtml(f1, f2);
-            ChromeDriver driver = ScreenShotUtils.chromeDriver(true);
+            driver = ScreenShotUtils.chromeDriver(true);
             driver.get(f2.getAbsolutePath());
             driver.manage().window().setSize(new Dimension(width + 20, height + 20));
             // 隐藏滚动条
@@ -128,8 +192,15 @@ public class WrapHtmlUtils {
                     BotHandler.getFile("working/menu.png")).getAbsolutePath(), false);
         } catch (Exception e) {
             logger.error("生成菜单报错 {}", e.getMessage());
+            return null;
+        } finally {
+            if (driver != null) {
+                try {
+                    driver.close();
+                    driver.quit();
+                } catch (Exception ignored) {}
+            }
         }
-        return null;
     }
 
     // 转换成标准HTML

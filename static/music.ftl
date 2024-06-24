@@ -57,8 +57,16 @@
         <#list list as item>
             <tr>
                 <td colspan="1" style="text-align: center">${item_index}</td>
-                <td colspan="2" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden;">${item.singername}</td>
-                <td colspan="5" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden;">${item.name}</td>
+                <#if item.singername??>
+                    <td colspan="2" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden;">${item.singername}</td>
+                <#else>
+                    <td colspan="2" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden;">${item.singer}</td>
+                </#if>
+                <#if item.name??>
+                    <td colspan="5" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden;">${item.name}</td>
+                <#else>
+                    <td colspan="5" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden;">${item.song}</td>
+                </#if>
             </tr>
         </#list>
         <tr>

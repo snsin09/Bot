@@ -27,7 +27,10 @@ public class MusicAction {
         if (StringUtil.isBlank(cmd) || !StringUtil.isNumeric(cmd)) return;
         String url = Music_Cache_Data.Cache_Music.get(chain.getSender().getUser_id());
         if (url == null) chain.sendReplyMsg(new TextMessage("请先点歌"));
-        else dealMusic(url, chain, Integer.parseInt(cmd), 1);
+        else {
+            int index = Integer.parseInt(cmd);
+            dealMusic(url, chain, url.contains("https://api.lolimi.cn") ? index + 1 : index, 1);
+        }
     }
 
     @BotCommand(cmd = "p", alias = "P", description = "翻页", permit = false)
@@ -36,33 +39,50 @@ public class MusicAction {
         if (StringUtil.isBlank(cmd) || !StringUtil.isNumeric(cmd)) return;
         String url = Music_Cache_Data.Cache_Music.get(chain.getSender().getUser_id());
         if (url == null) chain.sendReplyMsg(new TextMessage("请先点歌"));
-        else dealMusic(url, chain, null, Integer.parseInt(cmd));
+        else {
+            if (url.contains("c.y.qq.com") || url.contains("/wydg/")) {
+                chain.sendReplyMsg(new TextMessage("Q点歌、网易云点歌不支持翻页"));
+                return;
+            }
+            dealMusic(url, chain, null, Integer.parseInt(cmd));
+        }
     }
 
-    @BotCommand(cmd = "网易云点歌", description = "网易云点歌", permit = false)
-    public void netease(MetadataChain chain) {
+    @BotCommand(cmd = "网易云点歌", alias = "wyy点歌,163点歌", description = "网易云点歌", permit = false)
+    public void netEase(MetadataChain chain) {
         String cmd = chain.getBasicCommand().substring(5).trim();
         if (StringUtil.isBlank(cmd)) {
             chain.sendReplyMsg(new TextMessage("歌名呢？"));
             return;
         }
-        dealMusic(String.format("https://api.mrgnb.cn/API/netease.php?msg=%s&count=20", URLEncoder.encode(cmd, StandardCharsets.UTF_8)),
+        dealMusic(String.format("https://api.lolimi.cn/API/wydg/api.php?msg=%s", URLEncoder.encode(cmd, StandardCharsets.UTF_8)),
                 chain, null, 1);
     }
 
-    @BotCommand(cmd = "QQ点歌", description = "QQ点歌", permit = false)
-    public void qqmusic(MetadataChain chain) {
+    @BotCommand(cmd = "QQ点歌", alias = "qq点歌", description = "QQ点歌", permit = false)
+    public void qqMusic(MetadataChain chain) {
         String cmd = chain.getBasicCommand().substring(4).trim();
         if (StringUtil.isBlank(cmd)) {
             chain.sendReplyMsg(new TextMessage("歌名呢？"));
             return;
         }
-        dealMusic(String.format("https://api.mrgnb.cn/API/qqmusic.php?msg=%s&count=20", URLEncoder.encode(cmd, StandardCharsets.UTF_8)),
+        dealMusic(String.format("https://api.lolimi.cn/API/yiny/index.php?word=%s&num=20", URLEncoder.encode(cmd, StandardCharsets.UTF_8)),
+                chain, null, 1);
+    }
+
+    @BotCommand(cmd = "Q点歌", alias = "q点歌", description = "QQ点歌", permit = false)
+    public void qqMusic2(MetadataChain chain) {
+        String cmd = chain.getBasicCommand().substring(3).trim();
+        if (StringUtil.isBlank(cmd)) {
+            chain.sendReplyMsg(new TextMessage("歌名呢？"));
+            return;
+        }
+        dealMusic(String.format("https://c.y.qq.com/splcloud/fcgi-bin/smartbox_new.fcg?key=%S", URLEncoder.encode(cmd, StandardCharsets.UTF_8)),
                 chain, null, 1);
     }
 
     @BotCommand(cmd = "酷狗点歌", description = "酷狗点歌", permit = false)
-    public void kgmusic(MetadataChain chain) {
+    public void kgMusic(MetadataChain chain) {
         String cmd = chain.getBasicCommand().substring(4).trim();
         if (StringUtil.isBlank(cmd)) {
             chain.sendReplyMsg(new TextMessage("歌名呢？"));
@@ -77,25 +97,39 @@ public class MusicAction {
             if (index != null) url += "&n=" + index;
             if (page == null) page = 1;
             JSONObject res = HttpUtils.sendGet(url +  "&page=" + page, false);
-            if (res.isEmpty() || res.getInteger("code") != 200 || res.getJSONArray("data").isEmpty()) {
+            if (res.isEmpty() || (res.getInteger("code") != 200 && res.getInteger("code") != 0)) {
                 chain.sendReplyMsg(new TextMessage("没有找到歌曲"));
                 return;
             }
-            JSONArray array = res.getJSONArray("data");
             if (index == null) {
+                JSONArray array;
+                if (url.contains("c.y.qq.com")) array = res.getJSONObject("data").getJSONObject("song").getJSONArray("itemlist");
+                else array = res.getJSONArray("data");
                 if (array.size() == 1) dealMusic(url, chain, 0, page);
                 chain.sendReplyMsg(MediaMessage.imageMedia(WrapHtmlUtils.generateMusic(array)));
                 Music_Cache_Data.Cache_Music.put(chain.getSender().getUser_id(), url);
             } else {
-                JSONObject data = array.getJSONObject(0);
+                JSONObject data;
+                if (url.contains("c.y.qq.com")) data = res.getJSONObject("data").getJSONObject("song").getJSONArray("itemlist").getJSONObject(index);
+                else if (url.contains("/wydg/")) data = res;
+                else if (url.contains("/yiny/")) data = res.getJSONObject("data");
+                else data = res.getJSONArray("data").getJSONObject(0);
                 List<Object> list = new ArrayList<>();
-                if (url.contains("netease.php")) {
-                    list.add(MusicMessage.music("163", data.getString("id")));
-                } else if (url.contains("qqmusic.php")) {
+                if (url.contains("netease.php") || url.contains("/wydg/")) {
+                    if (data.getString("id") != null) list.add(MusicMessage.music("163", data.getString("id")));
+                    else if (data.get("mp3") != null) {
+                        url = url.split("&n=")[0];
+                        list.add(MusicMessage.music("163", HttpUtils.sendGet(url, false).getJSONArray("data").getJSONObject(index).getString("id")));
+                    }
+                } else if (url.contains("qqmusic.php") || url.contains("/yiny/")) {
                     if (data.get("song_url") != null)
                         list.add(MusicMessage.musicCustom("https://y.qq.com/n/ryqq/songDetail/" + data.getString("mid"), data.getString("song_url"),
                                 data.getString("name"), data.getString("singername"), data.getString("album_img")));
-                    else list.add(new TextMessage("付费歌曲，获取源文件失败"));
+                    else if (data.get("id") != null) {
+                        list.add(MusicMessage.music("qq", data.getString("id")));
+                    } else list.add(new TextMessage("付费歌曲，获取源文件失败"));
+                } else if (url.contains("c.y.qq.com")) {
+                    list.add(MusicMessage.music("qq", data.getString("id")));
                 } else {
                     StringBuilder builder = new StringBuilder();
                     builder.append("歌手：").append(data.getString("singername")).append("\n")
@@ -113,7 +147,11 @@ public class MusicAction {
                 }
                 chain.sendMsg(list);
                 String song_url = data.getString("song_url");
-                if (song_url.startsWith("http")) chain.sendMsg(MediaMessage.audioMedia(song_url));
+                if (!StringUtil.isBlank(song_url) && song_url.startsWith("http")) chain.sendMsg(MediaMessage.audioMedia(song_url));
+                song_url = data.getString("url");
+                if (!StringUtil.isBlank(song_url) && song_url.startsWith("http")) chain.sendMsg(MediaMessage.audioMedia(song_url));
+                song_url = data.getString("mp3");
+                if (!StringUtil.isBlank(song_url) && song_url.startsWith("http")) chain.sendMsg(MediaMessage.audioMedia(song_url));
                 String mv_url = data.getString("mv_url");
                 if (mv_url != null && mv_url.startsWith("http")) chain.sendMsg(MediaMessage.videoMedia(mv_url));
             }

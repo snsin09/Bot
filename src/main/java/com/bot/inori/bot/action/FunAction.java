@@ -9,6 +9,7 @@ import com.bot.inori.bot.model.res.AtMsg;
 import com.bot.inori.bot.model.res.MetadataChain;
 import com.bot.inori.bot.utils.HttpUtils;
 import com.bot.inori.bot.utils.SimpleMessageUtils;
+import com.bot.inori.bot.utils.StringUtil;
 import com.bot.inori.bot.utils.annotation.BotCommand;
 
 import java.io.File;
@@ -85,7 +86,7 @@ public class FunAction {
             AtMsg at = chain.getFirstAt();
             if (at != null) user_id = at.getQq();
             chain.sendMsg(new TextMessage(HttpUtils.getResp(String.format("https://api.lolimi.cn/API/Ser/?name=%s&type=text",
-                    URLEncoder.encode(BotHandler.getMemberInfo(chain.getGroup_id(), chain.getSender().getUser_id()).getNickname(), StandardCharsets.UTF_8)))));
+                    URLEncoder.encode(BotHandler.getMemberInfo(chain.getGroup_id(), user_id).getNickname(), StandardCharsets.UTF_8)))));
         }
     }
 
@@ -212,5 +213,25 @@ public class FunAction {
         if (chain.getBasicCommand().length() == 2) {
             chain.sendMsg(MediaMessage.imageMedia("http://api.yujn.cn/api/jk.php??"), "撤回");
         }
+    }
+
+    @BotCommand(cmd = "60秒读世界", alias = "60秒看世界", permit = false, description = "每日60s读世界")
+    public void everyDay60s(MetadataChain chain) {
+        if (chain.getBasicCommand().length() != 6) return;
+        JSONObject res = HttpUtils.sendGet("https://api.2xb.cn/zaob", false);
+        if (res != null && res.getInteger("code") == 200) chain.sendMsg(MediaMessage.imageMedia(res.getString("imageUrl")));
+    }
+
+    @BotCommand(cmd = "摸鱼日历", permit = false, description = "摸鱼日历")
+    public void moYu(MetadataChain chain) {
+        if (chain.getBasicCommand().length() != 4) return;
+        chain.sendMsg(MediaMessage.imageMedia("https://dayu.qqsuu.cn/moyuribao/apis.php"));
+    }
+
+    @BotCommand(cmd = "狗屁不通", permit = false, description = "狗屁不通文章生成 支持一个参数")
+    public void gp(MetadataChain chain) {
+        String cmd = chain.getBasicCommand().substring(4).trim();
+        if (StringUtil.isBlank(cmd)) cmd = chain.getSender().getNickname();
+        chain.sendMsg(new TextMessage(HttpUtils.getResp(String.format("https://api.lolimi.cn/API/dog/api.php?msg=%s&num=500&type=text", cmd))));
     }
 }

@@ -22,7 +22,7 @@ public class BotHandler {
     @Setter
     private static List<GroupData> GROUPS = new ArrayList<>();
 
-    private static Map<Long, List<GroupMemberData>> MEMBERS = new HashMap<>();
+    private static final Map<Long, List<GroupMemberData>> MEMBERS = new HashMap<>();
 
     @Getter
     private static Session session;
@@ -35,7 +35,6 @@ public class BotHandler {
 
     public static Integer SPEAKER_ID = 0;
 
-
     public static void putMembers(List<GroupMemberData> data) {
         if (!data.isEmpty()) {
             BotHandler.MEMBERS.put(data.get(0).getGroup_id(), data);
@@ -47,13 +46,8 @@ public class BotHandler {
     }
 
     public static Boolean isGroupOwner(Long group_id) {
-        if (group_id != null) {
-            for (GroupMemberData member : MEMBERS.get(group_id)) {
-                if (member.getUser_id().equals(BOT) && "owner".equals(member.getRole()))
-                    return Boolean.TRUE;
-            }
-        }
-        return Boolean.FALSE;
+        return MEMBERS.get(group_id).stream().filter(member -> member.getUser_id().equals(BOT)).findFirst()
+                .map(member -> "owner".equals(member.getRole())).orElse(false);
     }
 
     public static Boolean isGroupAdmin(Long group_id) {
@@ -62,11 +56,8 @@ public class BotHandler {
 
     public static Boolean userHasGroupPerm(Long group_id, Long user_id) {
         if (group_id != null && user_id != null) {
-            for (GroupMemberData member : MEMBERS.get(group_id)) {
-                if (member.getUser_id().equals(user_id) && ("owner".equals(member.getRole())
-                        || "admin".equals(member.getRole())))
-                    return Boolean.TRUE;
-            }
+            return MEMBERS.get(group_id).stream().filter(member -> member.getUser_id().equals(user_id)).findFirst()
+                    .map(member -> "owner".equals(member.getRole()) || "admin".equals(member.getRole())).orElse(false);
         }
         return Boolean.FALSE;
     }

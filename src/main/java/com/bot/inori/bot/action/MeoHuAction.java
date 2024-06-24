@@ -1,13 +1,18 @@
 package com.bot.inori.bot.action;
 
-import com.alibaba.fastjson2.JSONObject;
 import com.bot.inori.bot.model.data.MoeHuData;
 import com.bot.inori.bot.model.req.MediaMessage;
 import com.bot.inori.bot.model.req.TextMessage;
 import com.bot.inori.bot.model.res.MetadataChain;
-import com.bot.inori.bot.utils.HttpUtils;
 import com.bot.inori.bot.utils.StringUtil;
 import com.bot.inori.bot.utils.annotation.BotCommand;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 @SuppressWarnings("unused")
 public class MeoHuAction {
@@ -23,26 +28,37 @@ public class MeoHuAction {
     @BotCommand(cmd = "Moe关键字", description = "MoeHu 可使用关键字")
     public void moeHuKey(MetadataChain chain) {
         if (chain.getBasicCommand().length() != 6) return;
-        chain.sendMsg(new TextMessage(String.join("\n", MoeHuData.getNames())));
+        chain.sendMsg(new TextMessage(String.join(", ", MoeHuData.getNames())));
     }
 
-    @BotCommand(cmd = "60秒读世界", alias = "60秒看世界", permit = false, description = "每日60s读世界")
-    public void everyDay60s(MetadataChain chain) {
-        if (chain.getBasicCommand().length() != 6) return;
-        JSONObject res = HttpUtils.sendGet("https://api.2xb.cn/zaob", false);
-        if (res != null && res.getInteger("code") == 200) chain.sendMsg(MediaMessage.imageMedia(res.getString("imageUrl")));
-    }
-
-    @BotCommand(cmd = "摸鱼日历", permit = false, description = "摸鱼日历")
-    public void moYu(MetadataChain chain) {
-        if (chain.getBasicCommand().length() != 4) return;
-        chain.sendMsg(MediaMessage.imageMedia("https://dayu.qqsuu.cn/moyuribao/apis.php"));
-    }
-
-    @BotCommand(cmd = "狗屁不通", permit = false, description = "狗屁不通文章生成 支持一个参数")
-    public void gp(MetadataChain chain) {
-        String cmd = chain.getBasicCommand().substring(4).trim();
-        if (StringUtil.isBlank(cmd)) cmd = chain.getSender().getNickname();
-        chain.sendMsg(new TextMessage(HttpUtils.getResp(String.format("https://api.lolimi.cn/API/dog/api.php?msg=%s&num=500&type=text", cmd))));
+    @BotCommand(cmd = "看看", description = "看看age17的p站图片")
+    public void age17(MetadataChain chain) {
+        try {
+            String tags = chain.getBasicCommand().substring(2).trim();
+            String url = "https://acg17.com/category/meitu/pixiv-wallpaper?archiveSearch=" + tags.replace(" ", "+");
+            Document doc = Jsoup.connect(url).get();
+            Elements links = doc.getElementsByClass("thumb-link");
+            if (!links.isEmpty()) {
+                Random random = new Random();
+                url = links.get(random.nextInt(links.size())).attr("href");
+                doc = Jsoup.connect(url).get();
+                Elements entry = doc.getElementsByClass("entry-content");
+                if (!entry.isEmpty()) {
+                    Elements images = entry.get(0).getElementsByTag("img");
+                    List<String> data = images.stream().map(image -> {
+                        String img = image.attr("data-lazy-src");
+                        if (!StringUtil.isBlank(img) && img.contains("url=")) return img;
+                        return null;
+                    }).filter(str -> !StringUtil.isBlank(str)).limit(5).toList();
+                    if (!data.isEmpty()) {
+                        List<Object> list = new ArrayList<>();
+                        list.add(new TextMessage(doc.title()));
+                        data.forEach(img -> list.add(MediaMessage.imageMedia(img)));
+                        chain.sendListForwardMsg(list);
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+        }
     }
 }

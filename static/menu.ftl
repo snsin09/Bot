@@ -50,27 +50,36 @@
 <div class="container">
     <table>
         <caption style="font-size: 24px; height: 40px; line-height: 40px;">BOT菜单指令</caption>
-        <tr>
-            <th colspan="1">序号</th>
-            <th colspan="2">指令</th>
-            <th colspan="1">授权</th>
-            <th colspan="3">描述</th>
-        </tr>
         <#list list as item>
+        <thead>
             <tr>
-                <td colspan="1" style="text-align: center">${item_index + 1}</td>
-                <td colspan="2" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden;">${item.cmd}</td>
-                <#if item.permit == true>
-                    <td colspan="1">是</td>
-                <#else >
-                    <td colspan="1">否</td>
-                </#if>
-                <td colspan="3" style="white-space: nowrap; text-overflow:ellipsis; overflow: hidden;">${item.description}</td>
+                <td colspan="12" style="font-size: 22px; font-weight: bold; text-align: center;">${item.name}</td>
             </tr>
+        </thead>
+        <tbody>
+            <#list item.list as action>
+            <#if action?index % 4 == 0>
+            <tr>
+            </#if>
+                <td colspan="3">
+                    <span style="font-size: 18px">${action.cmd}</span>
+                    <br />
+                    <span style="font-size: 12px; white-space: nowrap; text-overflow:ellipsis; overflow: hidden; width: 240px; display: block">
+                        ${action.description}
+                    </span>
+                </td>
+            <#if action?index % 4 == 3>
+            </tr>
+            </#if>
+            </#list>
+            </tr>
+        </tbody>
         </#list>
-        <tr>
-            <td colspan="7" style="font-size: 18px; line-height: 24px; color: red; text-align: center; font-weight: bold;">使用表格指令即可调用机器人功能</td>
-        </tr>
+        <tfoot>
+            <tr>
+                <td colspan="12" style="font-size: 18px; line-height: 24px; color: red; text-align: center; font-weight: bold;">使用表格指令即可调用机器人功能</td>
+            </tr>
+        </tfoot>
     </table>
 </div>
 </body>

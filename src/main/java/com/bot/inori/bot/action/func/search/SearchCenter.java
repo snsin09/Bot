@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,7 @@ public class SearchCenter {
 
     public static void search(MetadataChain chain, String content, String url) {
         if (url != null) {
+            url = URLEncoder.encode(url, StandardCharsets.UTF_8);
             if (content.equals("搜番")) {
                 searchAnimate(chain, url);
             } else {
@@ -87,7 +89,7 @@ public class SearchCenter {
                     if (banner != null) {
                         list.add(MediaMessage.imageMedia(FileUtils.dlOrMoveImage2LS(banner, true)));
                     }
-                    chain.sendMsg(list);
+                    chain.sendMsg(list, "撤回");
 //                    chain.sendListForwardMsg(list);
                     return;
                 }
@@ -103,7 +105,6 @@ public class SearchCenter {
         try {
             String requestUrl = "https://saucenao.com/search.php?api_key=%s&db=999&output_type=2&testmode=1&numres=16&url=%s";
             JSONObject res = HttpUtils.sendGet(String.format(requestUrl, BaseConfig.sauceNaoApiKey, url), true);
-            logger.info("SauceNAO搜图返回值 {}", res);
             if (res == null || res.isEmpty()) return false;
             JSONArray results = res.getJSONArray("results");
             if (results == null || results.isEmpty()) return false;
@@ -151,8 +152,8 @@ public class SearchCenter {
                 }
                 list.add(new TextMessage(builder.toString()));
             }
-            if (!list.isEmpty()) {
-                chain.sendMsg(list);
+            if (!list.isEmpty() && list.size() > 1) {
+                chain.sendMsg(list, "撤回");
 //                chain.sendListForwardMsg(list);
                 return true;
             }
@@ -198,7 +199,7 @@ public class SearchCenter {
                     list.add(new TextMessage(builder.toString()));
                 }
                 if (!list.isEmpty()) {
-                    chain.sendMsg(list);
+                    chain.sendMsg(list, "撤回");
 //                    chain.sendListForwardMsg(list);
                     return;
                 }

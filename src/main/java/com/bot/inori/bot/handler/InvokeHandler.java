@@ -2,6 +2,7 @@ package com.bot.inori.bot.handler;
 
 import com.bot.inori.bot.action.AIAction;
 import com.bot.inori.bot.config.ActionConfig;
+import com.bot.inori.bot.model.data.ActionData;
 import com.bot.inori.bot.model.res.MetadataChain;
 import lombok.AllArgsConstructor;
 import lombok.Setter;
@@ -19,12 +20,12 @@ public class InvokeHandler extends Thread {
 
     @Override
     public void run() {
-        String command = chain.getBasicCommand();
-        if (!StringUtils.hasLength(command)) return;
-        if (chain.isAtBot() && PermissionHandler.checkPermission("回复", chain.getGroup_id()))
-            new Thread(() -> new AIAction().at_reply(chain)).start();
-        ActionConfig.actions.forEach(action -> {
-            try {
+        try {
+            String command = chain.getBasicCommand();
+            if (!StringUtils.hasLength(command)) return;
+            if (BotHandler.allowPrivate || (chain.isAtBot() && PermissionHandler.checkPermission("回复", chain.getGroup_id())))
+                new Thread(() -> new AIAction().at_reply(chain)).start();
+            for (ActionData action : ActionConfig.actions) {
                 if (action.hasCmd(command)) {
                     if (!BotHandler.isMaster(chain.getSender().getUser_id())) {
                         if (action.isMaster()) return;
@@ -35,9 +36,11 @@ public class InvokeHandler extends Thread {
                     MethodHandle methodHandle = lookup.findVirtual(action.getClazz(), action.getMethod().getName(), methodType);
                     methodHandle.invoke(action.getClazz().getDeclaredConstructor().newInstance(), chain);
                 }
-            } catch (Throwable e) {
-                MessageHandler.getLogger().error("调用方法报错 {}", e.getMessage());
             }
-        });
+        } catch (Throwable e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            if (this.isAlive()) this.interrupt();
+        }
     }
 }

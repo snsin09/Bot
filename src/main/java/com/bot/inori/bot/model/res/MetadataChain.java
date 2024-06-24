@@ -1,18 +1,17 @@
 package com.bot.inori.bot.model.res;
 
-import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.bot.inori.bot.handler.BotHandler;
 import com.bot.inori.bot.model.req.ForwardGroupMessage;
 import com.bot.inori.bot.model.req.ForwardPrivateMessage;
 import com.bot.inori.bot.model.req.ReplyMessage;
 import com.bot.inori.bot.utils.SimpleMessageUtils;
-import com.bot.inori.bot.handler.BotHandler;
 import jakarta.websocket.Session;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -93,29 +92,13 @@ public class MetadataChain {
     }
 
     public String getBasicCommand() {
-        if (!this.list.isEmpty()) {
-            StringBuilder builder = new StringBuilder();
-            for (MetadataMsg msg : this.list) {
-                if ("text".equalsIgnoreCase(msg.getType())) {
-                    builder.append((JSONObject.parseObject(msg.getData(), TextMsg.class)).getText().trim());
-                }
-            }
-            return builder.toString().trim();
-        }
-        return null;
+        return String.join("", this.list.stream().filter(meta -> "text".equals(meta.getType()))
+                .map(meta -> JSON.parseObject(meta.getData(), TextMsg.class).getText()).toList()).trim();
     }
 
     public List<FileMsg> getImages() {
-        if (!this.list.isEmpty()) {
-            List<FileMsg> fileMsgList = new ArrayList<>();
-            for (MetadataMsg msg : this.list) {
-                if ("image".equalsIgnoreCase(msg.getType())) {
-                    fileMsgList.add(JSONObject.parseObject(msg.getData(), FileMsg.class));
-                }
-            }
-            return fileMsgList;
-        }
-        return Collections.emptyList();
+        return this.list.stream().filter(meta -> "image".equals(meta.getType()))
+                .map(meta -> JSON.parseObject(meta.getData(), FileMsg.class)).toList();
     }
 
     public FileMsg getFirstImage() {
@@ -125,28 +108,13 @@ public class MetadataChain {
     }
 
     public List<AtMsg> getAtMsg() {
-        if (!this.list.isEmpty()) {
-            List<AtMsg> atMsgList = new ArrayList<>();
-            for (MetadataMsg msg : this.list) {
-                if ("at".equalsIgnoreCase(msg.getType())) {
-                    atMsgList.add(JSONObject.parseObject(msg.getData(), AtMsg.class));
-                }
-            }
-            return atMsgList;
-        }
-        return Collections.emptyList();
+        return this.list.stream().filter(meta -> "at".equals(meta.getType()))
+                .map(meta -> JSON.parseObject(meta.getData(), AtMsg.class)).toList();
     }
 
     public Boolean isAtBot() {
-        if (!this.list.isEmpty()) {
-            for (MetadataMsg msg : this.list) {
-                if ("at".equalsIgnoreCase(msg.getType())) {
-                    AtMsg atMsg = JSONObject.parseObject(msg.getData(), AtMsg.class);
-                    if (BotHandler.isBot(atMsg.getQq())) return true;
-                }
-            }
-        }
-        return false;
+        AtMsg at = getFirstAt();
+        return at != null && BotHandler.isBot(at.getQq());
     }
 
     public AtMsg getFirstAt() {
@@ -156,16 +124,8 @@ public class MetadataChain {
     }
 
     public List<ReplyMsg> getReplyMsg() {
-        if (!this.list.isEmpty()) {
-            List<ReplyMsg> replyMsgList = new ArrayList<>();
-            for (MetadataMsg msg : this.list) {
-                if ("reply".equalsIgnoreCase(msg.getType())) {
-                    replyMsgList.add(JSONObject.parseObject(msg.getData(), ReplyMsg.class));
-                }
-            }
-            return replyMsgList;
-        }
-        return Collections.emptyList();
+        return this.list.stream().filter(meta -> "reply".equals(meta.getType()))
+                .map(meta -> JSON.parseObject(meta.getData(), ReplyMsg.class)).toList();
     }
 
     public ReplyMsg getReply() {
@@ -175,16 +135,8 @@ public class MetadataChain {
     }
 
     public List<JsonMsg> getJsonMsg() {
-        if (!this.list.isEmpty()) {
-            List<JsonMsg> jsonMsgList = new ArrayList<>();
-            for (MetadataMsg msg : this.list) {
-                if ("json".equalsIgnoreCase(msg.getType())) {
-                    jsonMsgList.add(JSONObject.parseObject(msg.getData(), JsonMsg.class));
-                }
-            }
-            return jsonMsgList;
-        }
-        return Collections.emptyList();
+        return this.list.stream().filter(meta -> "json".equals(meta.getType()))
+                .map(meta -> JSON.parseObject(meta.getData(), JsonMsg.class)).toList();
     }
 
     public JsonMsg getFirstJson() {
