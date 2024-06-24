@@ -39,10 +39,6 @@ public class NoticeHandler {
                 case "group_increase" -> {
                     //群成员增加
                     logger.info("{} 新人加入\n新增成员 QQ:{}\n操作者 QQ:{}\n加入类型 {}", BotHandler.getGroupText(json.getLong("group_id")), json.getLong("user_id"), json.getLong("operator_id"), "invite".equalsIgnoreCase(json.getString("sub_type")) ? "邀请" : "申请");
-                    if (BotHandler.isBot(json.getLong("user_id")) && !BotHandler.isMaster(json.getLong("operator_id"))) {
-                        //验证群人数
-                        RequestHandler.checkGroupNumber(session, json.getLong("group_id"));
-                    }
                 }
                 case "group_ban" -> {
                     //群禁言
