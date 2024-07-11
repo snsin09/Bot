@@ -159,7 +159,7 @@ public class MessageHandler {
                         if (msg.getData().contains("com.tencent.miniapp") && msg.getData().contains("b23.tv")) {
                             JSONObject data = JSON.parseObject(msg.getData());
                             new Thread(() -> BiliAction.analysisRedirectB23Url(chain, data.getJSONObject("meta")
-                                    .getJSONObject("detail_1").getString("qqdocurl"))).start();
+                                    .getJSONObject("detail_1").getString("qqdocurl"), true)).start();
                         }
                     }
                 }
