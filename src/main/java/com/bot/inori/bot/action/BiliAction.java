@@ -1,6 +1,7 @@
 package com.bot.inori.bot.action;
 
 import com.bot.inori.bot.action.func.bili.BiliUtils;
+import com.bot.inori.bot.handler.PermissionHandler;
 import com.bot.inori.bot.model.entity.BVideo;
 import com.bot.inori.bot.model.entity.Entity;
 import com.bot.inori.bot.model.req.MediaMessage;
@@ -146,8 +147,10 @@ public class BiliAction {
         }
     }
 
-    public static void analysisRedirectB23Url(MetadataChain chain, String url) {
-        String redirectUrl = HttpUtils.getRedirectUrl(url);
+    public static void analysisRedirectB23Url(MetadataChain chain, String url, Boolean redirect) {
+        if (!PermissionHandler.checkPermission("B站视频解析", chain.getGroup_id())) return;
+        String redirectUrl = url;
+        if (redirect) redirectUrl = HttpUtils.getRedirectUrl(url);
         if (redirectUrl != null) {
             String bv = redirectUrl.substring(redirectUrl.lastIndexOf("/") + 1, redirectUrl.lastIndexOf("?"));
             BVideo video = BiliUtils.getBVInfo(bv);
@@ -159,7 +162,7 @@ public class BiliAction {
                     objects.add(new TextMessage(video + "\nAI总结：" + summary));
                 } else objects.add(new TextMessage(video.toString()));
                 chain.sendMsg(objects);
-                Entity entity = BiliUtils.getBVUrl(redirectUrl);
+                Entity entity = BiliUtils.getPlayUrl(bv, 16);
                 if (entity.getCode() != 0) chain.sendMsg(MediaMessage.videoMedia(entity.getData()));
                 else chain.sendMsg(new TextMessage(entity.getMsg()));
             }

@@ -70,7 +70,7 @@ public class FunAction {
     @BotCommand(cmd = "柴郡", description = "柴郡表情包", permit = false)
     public void cj(MetadataChain chain) {
         if (chain.getBasicCommand().length() != 2) return;
-        chain.sendMsg(MediaMessage.imageMedia("http://api.yujn.cn/api/chaijun.php?"));
+        chain.sendMsg(MediaMessage.imageMedia("https://api.lolimi.cn/API/chaiq/c.php"));
     }
 
     @BotCommand(cmd = "动漫一言", description = "随机动漫一言", permit = false)

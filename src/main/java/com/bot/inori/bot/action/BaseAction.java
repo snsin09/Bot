@@ -6,14 +6,14 @@ import com.bot.inori.bot.config.ActionConfig;
 import com.bot.inori.bot.handler.BotHandler;
 import com.bot.inori.bot.handler.PermissionHandler;
 import com.bot.inori.bot.model.data.ActionData;
+import com.bot.inori.bot.model.data.EmojiLikeData;
+import com.bot.inori.bot.model.req.EmojiLikeMessage;
 import com.bot.inori.bot.model.req.MediaMessage;
 import com.bot.inori.bot.model.req.PokeTouchMessage;
 import com.bot.inori.bot.model.req.TextMessage;
-import com.bot.inori.bot.model.res.AtMsg;
-import com.bot.inori.bot.model.res.FileMsg;
-import com.bot.inori.bot.model.res.MetadataChain;
-import com.bot.inori.bot.model.res.MetadataMsg;
+import com.bot.inori.bot.model.res.*;
 import com.bot.inori.bot.utils.HttpUtils;
+import com.bot.inori.bot.utils.SimpleMessageUtils;
 import com.bot.inori.bot.utils.StringUtil;
 import com.bot.inori.bot.utils.WrapHtmlUtils;
 import com.bot.inori.bot.utils.annotation.BotCommand;
@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -66,31 +67,55 @@ public class BaseAction {
         chain.sendMsg(cmd + "成功！");
     }
 
+    @BotCommand(cmd = "回应", alias = "el", description = "表情回应")
+    public void emojiLike(MetadataChain chain) {
+        String cmd = chain.getBasicCommand().substring(2);
+        if (!StringUtil.isBlank(cmd) && StringUtil.isNumeric(cmd)) {
+            int num = Integer.parseInt(cmd);
+            if (!BotHandler.isMaster(chain.getSender().getUser_id()))
+                num = Math.min(Integer.parseInt(cmd), 6);
+            List<String> list = new ArrayList<>();
+            Random random = new Random();
+            Long messageId = chain.getMessage_id();
+            ReplyMsg reply = chain.getReply();
+            if (reply != null) messageId = reply.getId();
+            while (list.size() < num) {
+                list.add(EmojiLikeData.emojiLikeData.get(random.nextInt(
+                        EmojiLikeData.emojiLikeData.size())).getCode());
+            }
+            String msgId = messageId.toString();
+            list.forEach(id -> SimpleMessageUtils.setMsgEmojiLike(chain.getSession(),
+                    new EmojiLikeMessage(msgId, id)));
+        }
+    }
+
     @BotCommand(cmd = "发", description = "功能调试 文字、图片(url)、视频(url)、音频(url)、json", isMaster = true)
     public void send(MetadataChain chain) {
-        String cmd = chain.getBasicCommand().substring(2).trim();
+        String cmd = chain.getBasicCommand().substring(1).trim();
         if (StringUtil.isBlank(cmd)) return;
         String[] arr = cmd.split(" ");
-        if (arr.length != 2) return;
-        switch (arr[0]) {
-            case "文字" -> chain.sendMsg(new TextMessage(arr[1]));
+        if (arr.length < 2) return;
+        String type = arr[0];
+        String msg = cmd.substring(type.length()).trim();
+        switch (type) {
+            case "文字" -> chain.sendMsg(new TextMessage(msg));
             case "图片" -> {
-                if (arr[1].startsWith("http")) chain.sendMsg(MediaMessage.imageMedia(arr[1]));
+                if (msg.startsWith("http")) chain.sendMsg(MediaMessage.imageMedia(msg));
             }
             case "视频" -> {
-                if (arr[1].startsWith("http")) chain.sendMsg(MediaMessage.videoMedia(arr[1]));
+                if (msg.startsWith("http")) chain.sendMsg(MediaMessage.videoMedia(msg));
             }
             case "音频" -> {
-                if (arr[1].startsWith("http")) chain.sendMsg(MediaMessage.audioMedia(arr[1]));
+                if (msg.startsWith("http")) chain.sendMsg(MediaMessage.audioMedia(msg));
             }
             case "json", "JSON", "Json" -> {
-                if (JSON.isValid(arr[1])) chain.sendMsg(
-                        "[CQ:json,data=" + arr[1]
-                        .replaceAll(",", "&#44;")
-                        .replaceAll("&", "&amp;")
-                        .replaceAll("\\[", "&#91;")
-                        .replaceAll("]", "&#93;")
-                        + "]");
+                if (JSON.isValid(msg)) chain.sendMsg(
+                        "[CQ:json,data=" + msg
+                                .replaceAll(",", "&#44;")
+                                .replaceAll("&", "&amp;")
+                                .replaceAll("\\[", "&#91;")
+                                .replaceAll("]", "&#93;")
+                                + "]");
             }
             default -> chain.sendMsg(new TextMessage("不支持的类型"));
         }
@@ -113,7 +138,9 @@ public class BaseAction {
             Matcher matcher = pattern.matcher(cmd);
             if (matcher.find()) {
                 String name = matcher.group();
-                if (name.contains("b23.tv")) BiliAction.analysisRedirectB23Url(chain, name);
+                if (name.contains("localhost:") || name.contains("localhost/")) return;
+                if (name.contains("b23.tv")) BiliAction.analysisRedirectB23Url(chain, name, true);
+                else if (name.contains("https://www.bilibili.com/video/BV")) BiliAction.analysisRedirectB23Url(chain, name, false);
                 else {
                     String url = WrapHtmlUtils.captureHtml(name);
                     if (url != null) chain.sendMsg(MediaMessage.imageMedia(url));

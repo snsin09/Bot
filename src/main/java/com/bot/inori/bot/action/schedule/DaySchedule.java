@@ -43,9 +43,6 @@ public class DaySchedule {
             String msg = HttpUtils.getResp("https://api.oick.cn/api/yiyan");
             if (msg != null) MoeHuData.SUMMARY = msg.substring(1, msg.length() - 1);
             System.gc();
-            Process process = Runtime.getRuntime().exec("taskkill /F /IM chrome.exe");
-            int exitCode = process.waitFor();
-            System.out.println("清理谷歌进程返回值: " + exitCode);
         } catch (Exception e) {
             MessageHandler.getLogger().error("更新图片外显报错 {}", e.getMessage());
         }

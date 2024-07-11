@@ -37,10 +37,6 @@ public class RequestHandler {
                                 json.getString("comment"))));
                         SimpleMessageUtils.sendMaster(messages);
                     }
-                    if (!BotHandler.isMaster(json.getLong("user_id"))
-                            && "invite".equals(json.getString("sub_type"))) {
-                        SimpleMessageUtils.sendPrivateMessage(session, json.getLong("user_id"), new TextMessage("邀请入群请加群：789692753"));
-                    }
                 }
                 default -> logger.info("不支持的请求消息 {} {}", session.getId(), json.toJSONString());
             }
