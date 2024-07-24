@@ -45,11 +45,11 @@ jobs:
     - name: Upload Original JAR artifact
       uses: actions/upload-artifact@v3
       with:
-        name: bot.jar
+        name: bot.jar.original
         path: target/*.jar.original
       
     - name: Upload libs packages
       uses: actions/upload-artifact@v3
       with:
-        name: bot.jar
+        name: libs
         path: target/libs/*.jar
