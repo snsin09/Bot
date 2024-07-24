@@ -28,7 +28,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
@@ -37,19 +37,19 @@ jobs:
       run: mvn clean package -B --file pom.xml
       
     - name: Upload Full JAR artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: bot.jar
         path: target/*.jar
       
     - name: Upload Original JAR artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: bot.jar.original
         path: target/*.jar.original
       
     - name: Upload libs packages
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: libs
         path: target/libs/*.jar
