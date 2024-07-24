@@ -12,6 +12,7 @@ import com.bot.inori.bot.model.res.ReplyMsg;
 import com.bot.inori.bot.utils.SimpleMessageUtils;
 import com.bot.inori.bot.utils.StringUtil;
 import com.bot.inori.bot.utils.annotation.BotCommand;
+import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import java.util.List;
  * 群管功能
  */
 @SuppressWarnings("unused")
+@Component
 public class GroupManageAction {
 
     @BotCommand(cmd = "群邀请", isMaster = true, description = "查询群邀请")

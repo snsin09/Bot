@@ -10,6 +10,7 @@ import com.bot.inori.bot.action.func.search.SearchCenter;
 import com.bot.inori.bot.model.data.ImageCacheData;
 import com.bot.inori.bot.model.res.FileMsg;
 import com.bot.inori.bot.model.res.MetadataChain;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unused")
+@Component
 public class SearchAction {
 
     @BotCommand(cmd = "搜", alias = "搜番", description = "搜图（sauceNao, Ascii2d），搜番（Animate）", permit = false)

@@ -1,7 +1,5 @@
 package com.bot.inori.bot.action;
 
-import com.bot.inori.bot.model.res.ReplyMsg;
-import com.bot.inori.bot.utils.annotation.BotCommand;
 import com.bot.inori.bot.handler.BotHandler;
 import com.bot.inori.bot.handler.MessageHandler;
 import com.bot.inori.bot.model.data.ImageCacheData;
@@ -11,12 +9,14 @@ import com.bot.inori.bot.model.req.MediaMessage;
 import com.bot.inori.bot.model.res.AtMsg;
 import com.bot.inori.bot.model.res.FileMsg;
 import com.bot.inori.bot.model.res.MetadataChain;
+import com.bot.inori.bot.model.res.ReplyMsg;
 import com.bot.inori.bot.utils.*;
+import com.bot.inori.bot.utils.annotation.BotCommand;
+import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Objects;
 
 @SuppressWarnings("unused")
+@Component
 public class GifAction {
 
     @BotCommand(cmd = "gif", alias = "GIF", description = "基础的gif操作，d（解码） r（旋转，后面可加毫秒数） x（缩小） ")

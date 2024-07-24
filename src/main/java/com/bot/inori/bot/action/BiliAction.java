@@ -13,6 +13,7 @@ import com.bot.inori.bot.action.func.bili.BiliQrcode;
 import com.bot.inori.bot.handler.MessageHandler;
 import com.bot.inori.bot.model.res.MetadataChain;
 import com.bot.inori.bot.utils.StringUtil;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("unused")
+@Component
 public class BiliAction {
 
     @BotCommand(cmd = "B站扫码", alias = "b站扫码", description = "B站扫码登录", isMaster = true)

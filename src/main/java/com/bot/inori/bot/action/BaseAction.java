@@ -20,6 +20,7 @@ import com.bot.inori.bot.utils.annotation.BotCommand;
 import com.google.zxing.*;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
+import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -33,6 +34,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
+@Component
 public class BaseAction {
 
     @BotCommand(cmd = "我的菜单", alias = "~菜单", description = "调出功能菜单")

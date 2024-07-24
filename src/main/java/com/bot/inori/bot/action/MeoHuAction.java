@@ -9,12 +9,14 @@ import com.bot.inori.bot.utils.annotation.BotCommand;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 @SuppressWarnings("unused")
+@Component
 public class MeoHuAction {
 
     @BotCommand(cmd = "来点", description = "随机 MoeHu 图片")

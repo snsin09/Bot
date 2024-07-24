@@ -11,6 +11,7 @@ import com.bot.inori.bot.utils.HttpUtils;
 import com.bot.inori.bot.utils.PixivUtils;
 import com.bot.inori.bot.utils.StringUtil;
 import com.bot.inori.bot.utils.annotation.BotCommand;
+import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.params.SetParams;
 
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Random;
 
 @SuppressWarnings("unused")
+@Component
 public class PixivAction {
 
     @BotCommand(cmd = "萝莉", description = "基于萝莉控接口实现的涩涩功能")

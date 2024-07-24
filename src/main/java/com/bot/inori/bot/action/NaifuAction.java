@@ -15,6 +15,7 @@ import com.bot.inori.bot.model.res.MetadataChain;
 import com.bot.inori.bot.utils.HttpUtils;
 import com.bot.inori.bot.utils.StringUtil;
 import org.apache.tomcat.util.codec.binary.Base64;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -23,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @SuppressWarnings("unused")
+@Component
 public class NaifuAction {
 
     private static Map<String, String> PROMPTS = new HashMap<>();

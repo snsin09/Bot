@@ -16,20 +16,19 @@ import com.bot.inori.bot.utils.HttpUtils;
 import com.bot.inori.bot.utils.SimpleMessageUtils;
 import com.bot.inori.bot.utils.StringUtil;
 import com.bot.inori.bot.utils.annotation.BotCommand;
+import org.springframework.stereotype.Component;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * <a href="https://github.com/snsin09/gpti-js/blob/main/README.md">...</a>
  */
 @SuppressWarnings("unused")
+@Component
 public class AIAction {
 
     @BotCommand(cmd = "bing", alias = "BING,Bing", description = "使用bing对话功能", permit = false)

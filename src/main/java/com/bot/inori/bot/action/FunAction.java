@@ -11,6 +11,7 @@ import com.bot.inori.bot.utils.HttpUtils;
 import com.bot.inori.bot.utils.SimpleMessageUtils;
 import com.bot.inori.bot.utils.StringUtil;
 import com.bot.inori.bot.utils.annotation.BotCommand;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.net.URLEncoder;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Random;
 
 @SuppressWarnings("unused")
+@Component
 public class FunAction {
 
     @BotCommand(cmd = "点赞", permit = false, description = "资料卡片点赞")

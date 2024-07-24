@@ -23,8 +23,12 @@ public class InvokeHandler extends Thread {
         try {
             String command = chain.getBasicCommand();
             if (!StringUtils.hasLength(command)) return;
-            if (BotHandler.allowPrivate || (chain.isAtBot() && PermissionHandler.checkPermission("回复", chain.getGroup_id())))
-                new Thread(() -> new AIAction().at_reply(chain)).start();
+            if ((chain.getGroup_id() == null && (BotHandler.allowPrivate || BotHandler.isMaster(chain.getUserId())))
+                    || (chain.isAtBot() && (PermissionHandler.checkPermission("回复", chain.getGroup_id())
+                    || BotHandler.isMaster(chain.getUserId())))) {
+                new AIAction().at_reply(chain);
+                return;
+            }
             for (ActionData action : ActionConfig.actions) {
                 if (action.hasCmd(command)) {
                     if (!BotHandler.isMaster(chain.getSender().getUser_id())) {
@@ -34,7 +38,7 @@ public class InvokeHandler extends Thread {
                     MethodHandles.Lookup lookup = MethodHandles.lookup();
                     MethodType methodType = MethodType.methodType(void.class, MetadataChain.class);
                     MethodHandle methodHandle = lookup.findVirtual(action.getClazz(), action.getMethod().getName(), methodType);
-                    methodHandle.invoke(action.getClazz().getDeclaredConstructor().newInstance(), chain);
+                    methodHandle.invoke(ActionConfig.getClass(action.getClazz()), chain);
                 }
             }
         } catch (Throwable e) {

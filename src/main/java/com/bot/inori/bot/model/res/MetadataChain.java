@@ -144,4 +144,8 @@ public class MetadataChain {
         if (jsonMsgList.isEmpty()) return null;
         return jsonMsgList.get(0);
     }
+
+    public Long getUserId() {
+        return this.sender.getUser_id();
+    }
 }

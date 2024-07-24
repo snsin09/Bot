@@ -12,6 +12,7 @@ import com.bot.inori.bot.utils.HttpUtils;
 import com.bot.inori.bot.utils.StringUtil;
 import com.bot.inori.bot.utils.WrapHtmlUtils;
 import com.bot.inori.bot.utils.annotation.BotCommand;
+import org.springframework.stereotype.Component;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unused")
+@Component
 public class MusicAction {
 
     @BotCommand(cmd = "#听", alias = "＃听", description = "选择听的歌曲", permit = false)

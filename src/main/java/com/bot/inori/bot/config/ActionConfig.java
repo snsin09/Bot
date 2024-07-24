@@ -6,6 +6,9 @@ import com.bot.inori.bot.model.data.ActionData;
 import com.bot.inori.bot.handler.MessageHandler;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -19,12 +22,16 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 @Component
+@ComponentScan(basePackages = "com.bot.inori.bot.action")
 public class ActionConfig {
 
     public static List<ActionData> actions = new ArrayList<>();
 
+    static ApplicationContext context = new AnnotationConfigApplicationContext(ActionConfig.class);
+
     public ActionConfig() {
         try {
+            if (!actions.isEmpty()) return;
             ClassLoader classLoader = this.getClass().getClassLoader();
             String packageUrl = this.getClass().getPackageName().replace("config", "action");
             String packagePath = packageUrl.replaceAll("\\.", "/");
@@ -37,7 +44,10 @@ public class ActionConfig {
                 File[] files;
                 Boolean remove = Boolean.FALSE;
                 if (url.getProtocol().equalsIgnoreCase("jar")) {
-                    String jarPath = url.getPath().substring(8, url.getPath().indexOf("/!BOOT-INF/"));
+                    String path = url.getPath();
+                    String jarPath;
+                    if (path.contains("/!BOOT-INF/")) jarPath = path.substring(8, path.indexOf("/!BOOT-INF/"));
+                    else jarPath = path.substring(6, path.indexOf("!/com/"));
                     files = getFileInJar(jarPath, packagePath);
                     remove = Boolean.TRUE;
                 } else files = new File(url.toURI()).listFiles();
@@ -120,5 +130,9 @@ public class ActionConfig {
             MessageHandler.getLogger().error("读取jar文件报错", e);
             return new File[0];
         }
+    }
+
+    public static Object getClass(Class<?> clazz) {
+        return context.getBean(clazz);
     }
 }
